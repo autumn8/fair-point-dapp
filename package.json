@@ -1,20 +1,23 @@
 {
-	"name": "fair-point-client",
-	"version": "0.1.0",
-	"description": "",
-	"main": "truffle-config.js",
-	"directories": {
-		"test": "test"
-	},
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"web3": "^1.0.0-beta.35"
-	},
-	"devDependencies": {
-		"ganache-cli": "^6.1.8"
-	}
+  "name": "fair-point-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "vue": "^2.5.17",
+    "vuex": "^3.0.1",
+    "web3": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.0",
+    "@vue/cli-plugin-eslint": "^3.0.0",
+    "@vue/cli-service": "^3.0.0",
+    "@vue/eslint-config-standard": "^3.0.1",
+    "ganache-cli": "^6.1.8",
+    "vue-template-compiler": "^2.5.17"
+  }
 }
