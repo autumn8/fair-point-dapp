@@ -21,7 +21,6 @@ beforeEach(async () => {
 	instance = await new web3.eth.Contract(abi)
 		.deploy({ data: bytecode })
 		.send({ from: accounts[0], gas: '1000000' });
-	//instance.setProvider(provider);
 });
 
 contract('FairPoint Test', async accounts => {
