@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div id="nav">
+      <router-link to="/upload">Upload</router-link> |
+      <router-link to="/purchase">Purchase</router-link>
+    </div>
+    <router-view/>
   </div>
 </template>
 
@@ -18,9 +21,9 @@ export default {
 	async mounted() {
 		const accounts = await web3.eth.getAccounts();
 		const from = accounts[0];
-		const price = web3.utils.toWei('0.2', 'ether');
+		const price = web3.utils.toWei('0.4', 'ether');
 		const ipfsHash =
-			'0xc831f48ff2c0a3ffa70380f2bff05f29f37486d896b306dc98a29bfb66c866dd';
+			'0xc831f48ff2c0a3ffa70380f2bff05f29f37486d896b306dccda29bfb66c866dd';
 		const tx = await instance.methods.addFile(ipfsHash, price).send({
 			from,
 			gas: '1000000'
