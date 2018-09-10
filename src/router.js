@@ -13,7 +13,7 @@ export default new Router({
 			component: Upload
 		},
 		{
-			path: '/purchase',
+			path: '/purchase/:id',
 			name: 'purchase',
 			component: Purchase
 		}

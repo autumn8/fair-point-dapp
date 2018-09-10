@@ -1,5 +1,5 @@
 <template>
   <div>
-    Purchase
+    Purchase file: {{$route.params.id}}
   </div>
 </template>
