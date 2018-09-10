@@ -12,7 +12,8 @@
                     <v-flex xs8>
                       <v-text-field
                           label="Price"
-                          prepend-icon="attach_money"
+                          prepend-icon="euro_symbol"
+                          v-model="amount"
                           required>
                       </v-text-field>
                     </v-flex>
@@ -49,6 +50,7 @@
 </template>
 
 <script>
+import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
 
 export default {
@@ -56,15 +58,10 @@ export default {
 	components: {
 		'file-upload': FileUpload
 	},
-	created() {
-		this.$on('fileSelected', file => {
-			console.log(file);
-			const formData = new FormData();
-			formData.append('data', file, file.name); // currently only one file at a time
-		});
-	},
+	created() {},
 	data() {
 		return {
+			amount: 0,
 			items: ['Wei', 'Ether'],
 			unit: '',
 			unitRules: [v => !!v || 'Currency unit is required'],
@@ -76,6 +73,20 @@ export default {
 	},
 	methods: {
 		submit() {
+			const formData = new FormData();
+			formData.append(
+				'primaryImage',
+				this.files.primary,
+				this.files.primary.name
+			);
+			formData.append(
+				'previewImage',
+				this.files.preview,
+				this.files.preview.name
+			);
+			const claimAmountInWei = web3.utils.toWei(this.amount, this.unit);
+			console.log(claimAmountInWei);
+			formData.append('price', claimAmountInWei);
 			console.log('submit');
 			console.log(this.files.primary);
 			console.log(this.files.preview);
