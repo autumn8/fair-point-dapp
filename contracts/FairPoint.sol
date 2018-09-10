@@ -1,31 +1,34 @@
 pragma solidity 0.4.24;
 
+import './SafeMath.sol';
+
 contract FairPoint {
 
+    using SafeMath for uint256;
+
+    address public owner;
+
     struct File {
-        uint price;
+        uint256 price;
         address creator;
         address buyer;
     }
 
+    mapping (address => uint256) balances;
+
     mapping (bytes32 => File) public files;
 
-    event PaymentSent(
-        address creator,
-        uint amount
-    );
-
     event FilePurchased(
+        address creator,
         address buyer,
         bytes32 fileName
     );
 
-    /*
-    Not possible to check for fileName by key & since creator is set when file
-    is first added, we'll check to see if creator has been set, which
-    we can take to mean that the file already exists.
-    */
-    function addFile(bytes32 fileName, uint price) public {
+    constructor() {
+      owner = msg.sender;
+    }
+
+    function addFile(bytes32 fileName, uint256 price) public {
 
         File storage file = files[fileName];
         require(file.creator == address(0), 'must be a new file- ie. have no existing creator address');
@@ -34,20 +37,15 @@ contract FairPoint {
     }
 
     function purchaseFile(bytes32 fileName) public payable {
-
         File storage file = files[fileName];
-        bool isFileAvailable = file.buyer == address(0);
         require(file.creator != address(0), 'must be an existing file- ie. have a creator address');
-        require(isFileAvailable, 'file is already sold');
+        require(file.buyer == address(0), 'file is already sold');
         require(msg.value >= file.price, 'sufficient funds need to be sent to pay for the file');
-
+        balances[file.creator].add(msg.value);
         file.buyer = msg.sender;
-        emit FilePurchased(file.buyer, fileName);
-        if (file.creator.send(msg.value)) {
-          emit PaymentSent(file.creator, msg.value);
-        }
-        //else add to withdrawal account & dispatch appropriate event;
-
+        emit FilePurchased(file.creator, file.buyer, fileName);
     }
+
+    // TODO create destroy & withdraw functions.
 
 }
