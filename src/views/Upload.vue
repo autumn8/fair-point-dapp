@@ -52,6 +52,7 @@
 <script>
 import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
+import axios from 'axios';
 
 export default {
 	name: 'Upload',
@@ -74,22 +75,28 @@ export default {
 	methods: {
 		submit() {
 			const formData = new FormData();
-			formData.append(
-				'primaryImage',
-				this.files.primary,
-				this.files.primary.name
-			);
-			formData.append(
-				'previewImage',
-				this.files.preview,
-				this.files.preview.name
-			);
+			formData.append('primary', this.files.primary, 'primary');
+			formData.append('preview', this.files.preview, 'preview');
 			const claimAmountInWei = web3.utils.toWei(this.amount, this.unit);
 			console.log(claimAmountInWei);
 			formData.append('price', claimAmountInWei);
 			console.log('submit');
 			console.log(this.files.primary);
 			console.log(this.files.preview);
+			console.log(formData);
+			axios
+				.post('http://localhost:8080/upload', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data'
+					}
+				})
+				.then(function(res) {
+					console.log(res);
+					console.log('SUCCESS!!');
+				})
+				.catch(function() {
+					console.log('FAILURE!!');
+				});
 		}
 	}
 };
