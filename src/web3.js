@@ -1,14 +1,17 @@
 import Web3 from 'web3';
 let web3;
 
-// TODO change this handle new post message of obtaining provider from metamask.
-if (typeof window.web3 !== 'undefined' && typeof window.web3 != 'undefined') {
-	// web3 = new Web3('wss://rinkeby.infura.io/ws'); for events
+if (typeof window.web3 === 'undefined') {
+	window.addEventListener('message', ({ data }) => {
+		if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
+			web3 = new Web3(ethereum);
+		}
+	});
+	window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
+}
+//fallback
+else {
 	web3 = new Web3(window.web3.currentProvider);
-} else {
-	console.warn(
-		'Please install metmask' //TODO add uport provider
-	);
 }
 
 export default web3;
