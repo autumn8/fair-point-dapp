@@ -24,7 +24,7 @@ contract FairPoint {
         bytes32 fileName
     );
 
-    constructor() {
+    constructor() public{
       owner = msg.sender;
     }
 
