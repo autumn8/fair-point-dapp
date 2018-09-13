@@ -43,6 +43,12 @@
               </v-btn>
             </v-card-actions>
           </v-card>
+          <v-container>
+            <p>This is the link to your purchase page:</p>
+          <v-btn v-if="purchaseURL" router :to="purchaseURL" flat>
+                  {{purchaseURL}}
+          </v-btn>
+        </v-container>
         </v-flex>
       </v-layout>
     </v-container>
@@ -53,6 +59,9 @@
 import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
 import axios from 'axios';
+import { sendForm } from '@/utils';
+import contractInstance from '@/contractInstance';
+import { getBytes32FromIpfsHash } from '@/ipfsHashConversion';
 
 export default {
 	name: 'Upload',
@@ -62,6 +71,7 @@ export default {
 	created() {},
 	data() {
 		return {
+			purchaseURL: undefined,
 			amount: 0,
 			items: ['Wei', 'Ether'],
 			unit: '',
@@ -73,29 +83,29 @@ export default {
 		};
 	},
 	methods: {
-		submit() {
-			const formData = new FormData();
-			formData.append('primary', this.files.primary, 'primary');
-			formData.append('preview', this.files.preview, 'preview');
-			const claimAmountInWei = web3.utils.toWei(this.amount, this.unit);
-			console.log(claimAmountInWei);
-			formData.append('price', claimAmountInWei);
-			console.log('submit');
-			console.log(this.files.primary);
-			console.log(this.files.preview);
-			console.log(formData);
-			axios
-				.post('http://localhost:8080/upload', formData, {
-					headers: {
-						'Content-Type': 'multipart/form-data'
-					}
-				})
-				.then(function(res) {
-					console.log(res);
+		async submit() {
+			const accounts = await web3.eth.getAccounts();
+			const price = await web3.utils.toWei(this.amount, this.unit);
+			sendForm(this.files.primary, this.files.preview, price)
+				.then(async res => {
+					const bytes32 = getBytes32FromIpfsHash(res.data.primaryHash);
+					const tx = await contractInstance.methods
+						.addFile(bytes32, price)
+						.send({
+							from: accounts[0],
+							gas: '1000000'
+						});
+					const file = await contractInstance.methods
+						.files(bytes32)
+						.call({ from: accounts[0] });
+					console.log(file);
+
+					this.purchaseURL = `/purchase/${res.data.primaryHash}`;
 					console.log('SUCCESS!!');
 				})
-				.catch(function() {
+				.catch(function(err) {
 					console.log('FAILURE!!');
+					console.log(err);
 				});
 		}
 	}

@@ -1,4 +1,9 @@
 import Web3 from 'web3';
+import { Connect } from 'uport-connect';
+const appName = 'Fair Point';
+const connect = new Connect(appName, { network: 'rinkeby' });
+const provider = connect.getWeb3();
+
 let web3;
 
 if (typeof window.web3 === 'undefined') {

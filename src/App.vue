@@ -21,19 +21,19 @@ import instance from './contractInstance';
 export default {
 	name: 'app',
 	async mounted() {
-		const accounts = await web3.eth.getAccounts();
-		const from = accounts[0];
-		const price = web3.utils.toWei('0.4', 'ether');
-		const ipfsHash =
-			'0xc831f48ff2c0a3ffa70380f2bff05f29f37486d896b306dccda29bfb66c866dd';
-		// const tx = await instance.methods.addFile(ipfsHash, price).send({
-		// 	from,
-		// 	gas: '1000000'
-		// });
-		// console.log(tx);
-
-		const file = await instance.methods.files(ipfsHash).call({ from });
-		console.log(file);
+		// const accounts = await web3.eth.getAccounts();
+		// const from = accounts[0];
+		// const price = web3.utils.toWei('0.4', 'nanoether');
+		// const ipfsHash =
+		// 	'0xc831f48ff2c0a3ffa70380f2bff05f29f37486d896b306dccda29bfb66c866dd';
+		// // const tx = await instance.methods.addFile(ipfsHash, price).send({
+		// // 	from,
+		// // 	gas: '1000000'
+		// // });
+		// // console.log(tx);
+		//
+		// const file = await instance.methods.files(ipfsHash).call({ from });
+		// console.log(file);
 	}
 };
 </script>
