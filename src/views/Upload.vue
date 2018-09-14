@@ -84,10 +84,11 @@ export default {
 		async submit() {
 			sendForm(this.files.primary, this.files.preview)
 				.then(async res => {
-					addFileToContract(res.data.primaryHash, this.amount, this.ethUnit)
+					console.log(res);
+					addFileToContract(res.data._id, this.amount, this.ethUnit)
 						.then(receipt => {
 							console.log(receipt);
-							this.purchaseURL = `/purchase/${res.data.primaryHash}`;
+							this.purchaseURL = `/purchase/${res.data._id}`;
 							console.log(this.purchaseURL);
 							console.log('SUCCESS!!');
 						})

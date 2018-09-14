@@ -42,10 +42,8 @@ export default {
 	methods: {
 		async getEthereumData() {
 			const accounts = await web3.eth.getAccounts();
-			const bytes32 = getBytes32FromIpfsHash(this.$route.params.id);
-			console.log(bytes32);
 			contractInstance.methods
-				.files(bytes32)
+				.files(this.$route.params.id)
 				.call({ from: accounts[0] })
 				.then(res => {
 					if (accounts[0] === res.buyer) {
@@ -61,16 +59,15 @@ export default {
 		},
 		async buy() {
 			const accounts = await web3.eth.getAccounts();
-			const bytes32 = getBytes32FromIpfsHash(this.$route.params.id);
 			contractInstance.methods
-				.purchaseFile(bytes32)
+				.purchaseFile(this.$route.params.id)
 				.send({
 					from: accounts[0],
 					value: this.price,
 					gas: '1000000'
 				})
 				.then(receipt => {
-					console.log(receipt);
+					this.userHasPurchasedFile = true;
 				})
 				.catch(error => {
 					console.log('caught error');

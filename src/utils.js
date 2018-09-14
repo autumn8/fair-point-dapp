@@ -15,22 +15,21 @@ function sendForm(primaryImage, previewImage, price) {
 	});
 }
 
-async function addFileToContract(ipfsHash, amount, ethUnit) {
+async function addFileToContract(fileID, amount, ethUnit) {
+	debugger;
 	const accounts = await web3.eth.getAccounts();
 	const gas = '1000000';
 	console.log(accounts[0]);
 	const price = web3.utils.toWei(amount, ethUnit);
-	const bytes32 = getBytes32FromIpfsHash(ipfsHash);
-	return contractInstance.methods.addFile(bytes32, price).send({
+	return contractInstance.methods.addFile(fileID, price).send({
 		from: accounts[0],
 		gas
 	});
 }
 
-async function getFileFromContract(ipfsHash, amount, ethUnit) {
-	const bytes32 = getBytes32FromIpfsHash(ipfsHash);
+async function getFileFromContract(fileID, amount, ethUnit) {
 	const file = await contractInstance.methods
-		.files(bytes32)
+		.files(fileID)
 		.call({ from: accounts[0] });
 }
 
