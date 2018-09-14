@@ -18,10 +18,10 @@
                       </v-text-field>
                     </v-flex>
                     <v-flex xs4>
-                      <v-select v-model="unit" :items="items" label="Currency Unit" required>
+                      <v-select v-model="ethUnit" :items="items" label="Currency Unit" required>
                       <!-- <v-select :disabled="isFormSending"
                           prepend-icon="aspect_ratio"
-                          v-model="unit"
+                          v-model="ethUnit"
                           :rules="unitRules"
                           :items="items"
                           label="Curreny Unit"
@@ -59,9 +59,7 @@
 import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
 import axios from 'axios';
-import { sendForm } from '@/utils';
-import contractInstance from '@/contractInstance';
-import { getBytes32FromIpfsHash } from '@/ipfsHashConversion';
+import { sendForm, addFileToContract } from '@/utils';
 
 export default {
 	name: 'Upload',
@@ -74,7 +72,7 @@ export default {
 			purchaseURL: undefined,
 			amount: 0,
 			items: ['Wei', 'Ether'],
-			unit: '',
+			ethUnit: '',
 			unitRules: [v => !!v || 'Currency unit is required'],
 			files: {
 				primary: undefined,
@@ -84,23 +82,19 @@ export default {
 	},
 	methods: {
 		async submit() {
-			const accounts = await web3.eth.getAccounts();
-			const price = await web3.utils.toWei(this.amount, this.unit);
-			sendForm(this.files.primary, this.files.preview, price)
+			sendForm(this.files.primary, this.files.preview)
 				.then(async res => {
-					const bytes32 = getBytes32FromIpfsHash(res.data.primaryHash);
-					const tx = await contractInstance.methods
-						.addFile(bytes32, price)
-						.send({
-							from: accounts[0],
-							gas: '1000000'
+					addFileToContract(res.data.primaryHash, this.amount, this.ethUnit)
+						.then(receipt => {
+							console.log(receipt);
+							this.purchaseURL = `/purchase/${res.data.primaryHash}`;
+							console.log(this.purchaseURL);
+							console.log('SUCCESS!!');
+						})
+						.catch(error => {
+							console.log('caught error');
+							console.log(error);
 						});
-					const file = await contractInstance.methods
-						.files(bytes32)
-						.call({ from: accounts[0] });
-					console.log(file);
-
-					this.purchaseURL = `/purchase/${res.data.primaryHash}`;
 					console.log('SUCCESS!!');
 				})
 				.catch(function(err) {

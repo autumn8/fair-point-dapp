@@ -8,7 +8,8 @@
           class="grey lighten-2">
         </v-img>
       </v-card>
-      <v-btn @click="buy()" right color="info">Buy Now: {{price}}</v-btn>
+      <v-btn v-if="!userHasPurchasedFile" @click="buy()" right color="info">Buy Now: {{price}}</v-btn>
+      <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
 </v-container>
   </div>
 </template>
@@ -22,7 +23,8 @@ export default {
 	data() {
 		return {
 			src: '',
-			price: 0
+			price: 0,
+			userHasPurchasedFile: false
 		};
 	},
 	created() {
@@ -46,6 +48,9 @@ export default {
 				.files(bytes32)
 				.call({ from: accounts[0] })
 				.then(res => {
+					if (accounts[0] === res.buyer) {
+						this.userHasPurchasedFile = true;
+					}
 					this.price = res.price;
 					this.formattedPrice = `${web3.utils.fromWei(
 						this.price,
@@ -57,29 +62,12 @@ export default {
 		async buy() {
 			const accounts = await web3.eth.getAccounts();
 			const bytes32 = getBytes32FromIpfsHash(this.$route.params.id);
-			console.log(bytes32);
 			contractInstance.methods
 				.purchaseFile(bytes32)
 				.send({
 					from: accounts[0],
 					value: this.price,
 					gas: '1000000'
-				})
-				.once('transactionHash', hash => {
-					console.log('hash');
-					console.log(hash);
-				})
-				.once('receipt', receipt => {
-					console.log('receipt');
-					console.log(receipt);
-				})
-				.on('confirmation', (confirmationNumber, receipt) => {
-					console.log('confirmationNumber');
-					console.log(confirmationNumber);
-				})
-				.on('error', error => {
-					console.log('ERROR');
-					console.log(error);
 				})
 				.then(receipt => {
 					console.log(receipt);
@@ -88,20 +76,6 @@ export default {
 					console.log('caught error');
 					console.log(error);
 				});
-
-			// const await contractInstance.methods.purchaseFile(bytes32).send({
-			// 	from: accounts[0],
-			// 	value: this.price,
-			// 	gas: '1000000'
-			// });
-
-			// await contractInstance.methods
-			// 	.files(bytes32)
-			// 	.call({ from: accounts[0] })
-			// 	.then(res => {
-			// 		console.log(res);
-			// 	})
-			// 	.catch(err => console.log(err));
 		}
 	}
 };
