@@ -1,15 +1,6 @@
 <template>
   <v-app>
-    <div id="nav">
-      <v-btn router to="/upload" flat>
-        <v-icon>payment</v-icon>
-        Upload files
-      </v-btn>
-      <v-btn router to="/purchase" flat>
-        <v-icon>assessment</v-icon>
-        Buy a file
-      </v-btn>
-    </div>
+
     <router-view/>
   </v-app>
 </template>

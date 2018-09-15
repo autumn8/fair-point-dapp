@@ -1,14 +1,15 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Upload from './views/Upload.vue';
-import Purchase from './views/Purchase.vue';
+import Upload from '@/views/Upload.vue';
+import Purchase from '@/views/Purchase.vue';
+import Home from '@/views/Home.vue';
 
 Vue.use(Router);
 
 export default new Router({
 	routes: [
 		{
-			path: '/upload',
+			path: '/',
 			name: 'upload',
 			component: Upload
 		},

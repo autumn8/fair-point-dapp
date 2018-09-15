@@ -1,15 +1,19 @@
 <template>
   <div>
     <v-container>
-      <v-card>
-        <v-img
-          :src="src"
-          aspect-ratio="1"
-          class="grey lighten-2">
-        </v-img>
-      </v-card>
-      <v-btn v-if="!userHasPurchasedFile" @click="buy()" right color="info">Buy Now: {{price}}</v-btn>
-      <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
+      <v-layout align-center justify-center>
+        <v-flex xs6>
+          <v-card>
+            <v-img
+              :src="src"
+              aspect-ratio="1"
+              class="grey lighten-2">
+            </v-img>
+          </v-card>
+        </v-flex>
+      </v-layout>
+      <v-btn v-if="!userHasPurchasedFile" @click="buy()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
+      <v-btn v-if="userHasPurchasedFile" :href="downloadRoute" right color="info">Download Now</v-btn>
 </v-container>
   </div>
 </template>
@@ -24,7 +28,9 @@ export default {
 		return {
 			src: '',
 			price: 0,
-			userHasPurchasedFile: false
+			userHasPurchasedFile: false,
+			downloadRoute: '',
+			formattedPrice: 0
 		};
 	},
 	created() {
@@ -48,6 +54,9 @@ export default {
 				.then(res => {
 					if (accounts[0] === res.buyer) {
 						this.userHasPurchasedFile = true;
+						this.downloadRoute = `http://localhost:8080/download/${
+							this.$route.params.id
+						}`;
 					}
 					this.price = res.price;
 					this.formattedPrice = `${web3.utils.fromWei(
@@ -68,6 +77,10 @@ export default {
 				})
 				.then(receipt => {
 					this.userHasPurchasedFile = true;
+					this.downloadRoute = `http://localhost:8080/download/${
+						this.$route.params.id
+					}`;
+					console.log(receipt);
 				})
 				.catch(error => {
 					console.log('caught error');
