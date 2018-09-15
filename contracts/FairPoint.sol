@@ -46,6 +46,10 @@ contract FairPoint {
         emit FilePurchased(file.creator, file.buyer, fileName);
     }
 
-    // TODO create destroy & withdraw functions.
-
+    function withdrawFunds() public {
+      require(balances[msg.sender] > 0);
+      const amount = balances[msg.sender];
+      balances[msg.sender].sub(amount);
+      msg.sender.transfer(amount);
+    }
 }
