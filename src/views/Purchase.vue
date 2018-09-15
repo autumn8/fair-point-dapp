@@ -13,7 +13,7 @@
         </v-flex>
       </v-layout>
       <v-btn v-if="!userHasPurchasedFile" @click="buy()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
-      <v-btn v-if="userHasPurchasedFile" :href="downloadRoute" right color="info">Download Now</v-btn>
+      <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
 </v-container>
   </div>
 </template>
@@ -65,6 +65,23 @@ export default {
 					)} Eth`;
 				})
 				.catch(err => console.log(err));
+		},
+		async download() {
+			const accounts = await web3.eth.getAccounts();
+			const signature = web3.eth.personal
+				.sign(web3.utils.utf8ToHex(this.$route.params.id), accounts[0])
+				.then(signature => {
+					console.log(signature);
+					//axios get download /signature/id.
+					web3.eth.personal
+						.ecRecover(web3.utils.utf8ToHex(this.$route.params.id), signature)
+						.then(console.log);
+					console.log('then block');
+				})
+				.catch(error => {
+					console.log(error);
+					console.log('error');
+				});
 		},
 		async buy() {
 			const accounts = await web3.eth.getAccounts();
