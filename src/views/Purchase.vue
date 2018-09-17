@@ -67,21 +67,35 @@ export default {
 				.catch(err => console.log(err));
 		},
 		async download() {
+			console.log('download');
 			const accounts = await web3.eth.getAccounts();
-			const signature = web3.eth.personal
-				.sign(web3.utils.utf8ToHex(this.$route.params.id), accounts[0])
-				.then(signature => {
-					console.log(signature);
-					//axios get download /signature/id.
-					web3.eth.personal
-						.ecRecover(web3.utils.utf8ToHex(this.$route.params.id), signature)
-						.then(console.log);
-					console.log('then block');
-				})
-				.catch(error => {
-					console.log(error);
-					console.log('error');
-				});
+			const fileID = this.$route.params.id;
+			const msg = web3.utils.utf8ToHex(fileID);
+			const signature = await web3.eth.personal.sign(msg, accounts[0]);
+			console.log(signature);
+			// use window open to launch dave dialog.
+			window.open(`http://localhost:8080/download/${fileID}/${signature}`);
+			// axios
+			// 	.get(`http://localhost:8080/download/${fileID}/${signature}`)
+			// 	.then(res => console.log(res));
+			// .then(async res => {
+			//   console.log(res);
+			// 	this.src = `http://ipfs.io/ipfs/${res.data.previewHash}`;
+			// 	this.getEthereumData(this.$route.params.id);
+			// 	console.log('SUCCESS!!');
+			// })
+			// .catch(function() {
+			// 	console.log('FAILURE!!');
+			// });
+			//     //const msg =
+			// 	// const signature = web3.eth.personal
+			// 	// 	.ecRecover(web3.utils.utf8ToHex(this.$route.params.id), signature)
+			// 	// 	.console.log('then block');
+			// })
+			// .catch(error => {
+			// 	console.log(error);
+			// 	console.log('error');
+			// });
 		},
 		async buy() {
 			const accounts = await web3.eth.getAccounts();
