@@ -1,6 +1,5 @@
 <template>
-
-    <v-container grid-list-md text-xs-center>
+    <v-container fluid fill-height>
       <v-layout  align-center justify-center>
         <v-flex xs8>
           <v-card class="elevation-12">
@@ -46,7 +45,7 @@
           <v-container>
             <p>This is the link to your purchase page:</p>
           <v-btn v-if="purchaseURL" router :to="purchaseURL" flat>
-                  {{purchaseURL}}
+                  {{absolutePurchaseURL}}
           </v-btn>
         </v-container>
         </v-flex>
@@ -89,6 +88,9 @@ export default {
 						.then(receipt => {
 							console.log(receipt);
 							this.purchaseURL = `/purchase/${res.data._id}`;
+							this.absolutePurchaseURL = `${location.origin}${
+								this.purchaseURL
+							}`;
 							console.log(this.purchaseURL);
 							console.log('SUCCESS!!');
 						})
