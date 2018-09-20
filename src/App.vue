@@ -8,7 +8,6 @@
 <script>
 import web3 from './web3';
 import instance from './contractInstance';
-import '@/utils';
 
 export default {
 	name: 'app'
