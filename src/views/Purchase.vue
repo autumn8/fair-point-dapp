@@ -21,7 +21,6 @@
 import axios from 'axios';
 import web3 from '@/web3';
 import contractInstance from '@/contractInstance';
-import { getBytes32FromIpfsHash } from '@/ipfsHashConversion';
 
 export default {
 	data() {
@@ -71,31 +70,12 @@ export default {
 			const accounts = await web3.eth.getAccounts();
 			const fileID = this.$route.params.id;
 			const msg = web3.utils.utf8ToHex(fileID);
+			console.log(msg);
+			console.log('signed by', accounts[0]);
 			const signature = await web3.eth.personal.sign(msg, accounts[0]);
 			console.log(signature);
-			// use window open to launch dave dialog.
+			// use window open to launch save dialog.
 			window.open(`http://localhost:8080/download/${fileID}/${signature}`);
-			// axios
-			// 	.get(`http://localhost:8080/download/${fileID}/${signature}`)
-			// 	.then(res => console.log(res));
-			// .then(async res => {
-			//   console.log(res);
-			// 	this.src = `http://ipfs.io/ipfs/${res.data.previewHash}`;
-			// 	this.getEthereumData(this.$route.params.id);
-			// 	console.log('SUCCESS!!');
-			// })
-			// .catch(function() {
-			// 	console.log('FAILURE!!');
-			// });
-			//     //const msg =
-			// 	// const signature = web3.eth.personal
-			// 	// 	.ecRecover(web3.utils.utf8ToHex(this.$route.params.id), signature)
-			// 	// 	.console.log('then block');
-			// })
-			// .catch(error => {
-			// 	console.log(error);
-			// 	console.log('error');
-			// });
 		},
 		async buy() {
 			const accounts = await web3.eth.getAccounts();
