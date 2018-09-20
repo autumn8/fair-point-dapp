@@ -1,43 +1,29 @@
 <template>
     <v-container fluid fill-height>
       <v-layout  align-center justify-center>
-        <v-flex xs8>
+        <v-flex xs6>
           <v-card class="elevation-12">
             <v-card-text>
-                <v-form ref="form">
+                <v-form ref="form" v-model="valid">
                   <file-upload v-model="files.primary" message="Select file available for purchase"/>
                   <file-upload v-model="files.preview" message="Select low-res preview file"/>
                   <v-layout  row wrap>
-                    <v-flex xs8>
+                    <v-flex xs3>
                       <v-text-field
-                          label="Price"
+                          label="Price in Ether"
+                          :rules="priceRules"
                           prepend-icon="euro_symbol"
-                          v-model="amount"
+                          v-model="price"
+                          :suffix="priceSuffix"
                           required>
                       </v-text-field>
                     </v-flex>
-                    <v-flex xs4>
-                      <v-select v-model="ethUnit" :items="items" label="Currency Unit" required>
-                      <!-- <v-select :disabled="isFormSending"
-                          prepend-icon="aspect_ratio"
-                          v-model="ethUnit"
-                          :rules="unitRules"
-                          :items="items"
-                          label="Curreny Unit"
-                          required> -->
-                    </v-select>
-                  </v-flex>
                 </v-layout>
               </v-form>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="submit()" >
-
-                <!-- primary
-                :disabled="!valid"
-                :loading="isSending"
-                @click="submit"> -->
+              <v-btn @click="submit()" :disabled="!valid" :loading="isSending">
               Send
               </v-btn>
             </v-card-actions>
@@ -48,6 +34,7 @@
                   {{absolutePurchaseURL}}
           </v-btn>
         </v-container>
+        <p :class="{error : formError, msg}">{{msg}}</p>
         </v-flex>
       </v-layout>
     </v-container>
@@ -57,8 +44,9 @@
 <script>
 import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
-import axios from 'axios';
-import { sendForm, addFileToContract } from '@/utils';
+import { sendForm, addFileToContract } from '@/fairPointService';
+import { __ } from '@/utils';
+import errorMessages from '@/errorMessages';
 
 export default {
 	name: 'Upload',
@@ -68,11 +56,20 @@ export default {
 	created() {},
 	data() {
 		return {
-			purchaseURL: undefined,
-			amount: 0,
-			items: ['Wei', 'Ether'],
-			ethUnit: '',
-			unitRules: [v => !!v || 'Currency unit is required'],
+			price: 0,
+			formError: false,
+			valid: false,
+			purchaseURL: null,
+			absolutePurchaseURL: null,
+			msg: '',
+			priceSuffix: ' ..that is around R535',
+			isSending: false,
+			ethUnit: 'Ether',
+			priceRules: [
+				v => !!v || 'Amount is required',
+				v => !isNaN(v) || 'Amount must be a number',
+				v => v > 0 || 'Amount must be greater than 0'
+			],
 			files: {
 				primary: undefined,
 				preview: undefined
@@ -81,30 +78,35 @@ export default {
 	},
 	methods: {
 		async submit() {
-			sendForm(this.files.primary, this.files.preview)
-				.then(async res => {
-					console.log(res);
-					addFileToContract(res.data._id, this.amount, this.ethUnit)
-						.then(receipt => {
-							console.log(receipt);
-							this.purchaseURL = `/purchase/${res.data._id}`;
-							this.absolutePurchaseURL = `${location.origin}${
-								this.purchaseURL
-							}`;
-							console.log(this.purchaseURL);
-							console.log('SUCCESS!!');
-						})
-						.catch(error => {
-							console.log('caught error');
-							console.log(error);
-						});
-					console.log('SUCCESS!!');
-				})
-				.catch(function(err) {
-					console.log('FAILURE!!');
-					console.log(err);
-				});
+			if (!this.$refs.form.validate()) return;
+			this.isSending = true;
+			const formResponse = await __(sendForm(this.files));
+			if (formResponse.error) {
+				this.formError = true;
+				this.msg = errorMessages.ERROR_ON_IMAGE_UPLOAD;
+				this.isSending = false;
+				return;
+			}
+
+			const price = web3.utils.toWei(this.price, this.ethUnit);
+			const fileID = formResponse.data.data._id;
+			const contractResponse = await __(addFileToContract(fileID, price));
+			if (contractResponse.error) {
+				this.msg = errorMessages.ERROR_ADDING_TO_CONTRACT;
+				this.formError = true;
+				this.isSending = false;
+				return;
+			}
+			this.isSending = false;
+			this.purchaseURL = `/purchase/${contractResponse.data.data._id}`;
+			this.absolutePurchaseURL = `${location.origin}${this.purchaseURL}`;
 		}
 	}
 };
 </script>
+
+<style>
+.msg {
+	padding: 10px;
+}
+</style>
