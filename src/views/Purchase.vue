@@ -18,9 +18,10 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
+import { getFileFromDB, getFileFromContract } from '@/fairPointService';
 import web3 from '@/web3';
 import contractInstance from '@/contractInstance';
+import { __ } from '@/utils';
 
 export default {
 	data() {
@@ -33,47 +34,40 @@ export default {
 		};
 	},
 	created() {
-		axios
-			.get(`http://localhost:8080/purchase/${this.$route.params.id}`)
-			.then(async res => {
-				this.src = `http://ipfs.io/ipfs/${res.data.previewHash}`;
-				this.getEthereumData(this.$route.params.id);
-				console.log('SUCCESS!!');
-			})
-			.catch(function() {
-				console.log('FAILURE!!');
-			});
+		const fileID = this.$route.params.id;
+		const productResponse = __(getFileFromDB(fileID));
+		if (productResponse.error) {
+			this.formError = true;
+			this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_DB;
+			return;
+		}
+		this.src = `http://ipfs.io/ipfs/${productResponse.data.data.previewHash}`;
+		this.getPaymentDataFromContract(fileID);
 	},
 	methods: {
-		async getEthereumData() {
+		async getPaymentDataFromContract(fileID) {
 			const accounts = await web3.eth.getAccounts();
-			contractInstance.methods
-				.files(this.$route.params.id)
-				.call({ from: accounts[0] })
-				.then(res => {
-					if (accounts[0] === res.buyer) {
-						this.userHasPurchasedFile = true;
-						this.downloadRoute = `http://localhost:8080/download/${
-							this.$route.params.id
-						}`;
-					}
-					this.price = res.price;
-					this.formattedPrice = `${web3.utils.fromWei(
-						this.price,
-						'ether'
-					)} Eth`;
-				})
-				.catch(err => console.log(err));
+			const contractResponse = __(getFileFromContract(fileID));
+			if (contractResponse.error) {
+				this.formError = true;
+				this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_CONTRACT;
+				return;
+			}
+			const { buyer, price } = contractResponse.data;
+
+			if (accounts[0] === buyer) {
+				this.userHasPurchasedFile = true;
+				this.downloadRoute = `http://localhost:8080/download/${fileID}`;
+			}
+			this.price = price;
+			this.formattedPrice = `${web3.utils.fromWei(this.price, 'ether')} Eth`;
 		},
+
 		async download() {
-			console.log('download');
 			const accounts = await web3.eth.getAccounts();
 			const fileID = this.$route.params.id;
 			const msg = web3.utils.utf8ToHex(fileID);
-			console.log(msg);
-			console.log('signed by', accounts[0]);
 			const signature = await web3.eth.personal.sign(msg, accounts[0]);
-			console.log(signature);
 			// use window open to launch save dialog.
 			window.open(`http://localhost:8080/download/${fileID}/${signature}`);
 		},
