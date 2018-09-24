@@ -48,7 +48,7 @@ contract FairPoint {
 
     function withdrawFunds() public {
       require(balances[msg.sender] > 0);
-      const amount = balances[msg.sender];
+      uint256 amount = balances[msg.sender];
       balances[msg.sender].sub(amount);
       msg.sender.transfer(amount);
     }
