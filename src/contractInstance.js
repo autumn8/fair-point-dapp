@@ -1,7 +1,7 @@
 import web3 from './web3';
 
 import FairPoint from '../build/contracts/FairPoint.json';
-const address = '0xe4651f1f52995f08320a28aa9c0f296fe721ffe4';
+const address = '0x7d4b398469487cc50dc60994eeb96e86fd64a68d';
 const { abi } = FairPoint;
 
 const contractInstance = new web3.eth.Contract(abi, address);
