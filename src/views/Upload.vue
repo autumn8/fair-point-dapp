@@ -10,10 +10,11 @@
                   <v-layout  row wrap>
                     <v-flex xs3>
                       <v-text-field
+                          @input="onPriceChange()"
                           label="Price in Ether"
                           :rules="priceRules"
                           prepend-icon="euro_symbol"
-                          v-model="price"
+                          v-model.lazy="price"
                           :suffix="priceSuffix"
                           required>
                       </v-text-field>
@@ -23,14 +24,17 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="submit()" :disabled="!valid" :loading="isSending">
+              <v-btn @click="submit()" color="info" :disabled="!valid" :loading="isSending">
               Send
               </v-btn>
             </v-card-actions>
           </v-card>
-          <v-container>
+          <v-container v-if="purchaseURL">
             <p>This is the link to your purchase page:</p>
-          <v-btn v-if="purchaseURL" router :to="purchaseURL" flat>
+          <v-btn
+              router
+              :to="purchaseURL"
+              flat>
                   {{absolutePurchaseURL}}
           </v-btn>
         </v-container>
@@ -44,7 +48,11 @@
 <script>
 import web3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
-import { sendForm, addFileToContract } from '@/fairPointService';
+import {
+	sendForm,
+	addFileToContract,
+	getEtherToZarExchangeRate
+} from '@/fairPointService';
 import { __ } from '@/utils';
 import errorMessages from '@/errorMessages';
 
@@ -53,7 +61,14 @@ export default {
 	components: {
 		'file-upload': FileUpload
 	},
-	created() {},
+	async created() {
+		const exchangeRateResponse = await __(getEtherToZarExchangeRate());
+		console.log('exchangeRate', exchangeRateResponse);
+		if (exchangeRateResponse.data && exchangeRateResponse.data.data.ZAR) {
+			this.exchangeRate = exchangeRateResponse.data.data.ZAR;
+			console.log(this.exchangeRate);
+		}
+	},
 	data() {
 		return {
 			price: 0,
@@ -62,13 +77,14 @@ export default {
 			purchaseURL: null,
 			absolutePurchaseURL: null,
 			msg: '',
-			priceSuffix: ' ..that is around R535',
+			priceSuffix: '',
 			isSending: false,
+			exchangeRate: undefined,
 			ethUnit: 'Ether',
 			priceRules: [
 				v => !!v || 'Amount is required',
-				v => !isNaN(v) || 'Amount must be a number',
-				v => v > 0 || 'Amount must be greater than 0'
+				v => !isNaN(v) || 'Amount must be a number'
+				// v => v > 0.01 || 'Amount must be greater than 0'
 			],
 			files: {
 				primary: undefined,
@@ -100,6 +116,10 @@ export default {
 			this.isSending = false;
 			this.purchaseURL = `/purchase/${contractResponse.data.data._id}`;
 			this.absolutePurchaseURL = `${location.origin}${this.purchaseURL}`;
+		},
+		onPriceChange() {
+			console.log(this.price);
+			this.priceSuffix = (this.price * this.exchangeRate).toFixed(2) + ' ZAR';
 		}
 	}
 };
