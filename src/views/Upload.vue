@@ -114,7 +114,7 @@ export default {
 				return;
 			}
 			this.isSending = false;
-			this.purchaseURL = `/purchase/${contractResponse.data.data._id}`;
+			this.purchaseURL = `/purchase/${fileID}`;
 			this.absolutePurchaseURL = `${location.origin}${this.purchaseURL}`;
 		},
 		onPriceChange() {

@@ -20,7 +20,7 @@ async function getEtherToZarExchangeRate() {
 }
 
 //This simply retrieves from orbitDB so we could get it directly in client?
-async function geFileFromDB(fileID) {
+async function getFileFromDB(fileID) {
 	return axios.get(`/purchase/${fileID}`);
 }
 
@@ -38,8 +38,19 @@ async function addFileToContract(fileID, price) {
 	});
 }
 
+async function purchaseFile(fileID, value) {
+	const accounts = await web3.eth.getAccounts();
+	const gas = '1000000';
+	return contractInstance.methods.purchaseFile(fileID).send({
+		from: accounts[0],
+		value,
+		gas
+	});
+}
+
 export {
 	addFileToContract,
+	purchaseFile,
 	sendForm,
 	getFileFromDB,
 	getFileFromContract,

@@ -12,13 +12,17 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-btn v-if="!userHasPurchasedFile" @click="buy()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
+      <v-btn v-if="!userHasPurchasedFile" @click="purchaseFile()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
       <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
 </v-container>
   </div>
 </template>
 <script>
-import { getFileFromDB, getFileFromContract } from '@/fairPointService';
+import {
+	getFileFromDB,
+	getFileFromContract,
+	purchaseFile
+} from '@/fairPointService';
 import web3 from '@/web3';
 import contractInstance from '@/contractInstance';
 import { __ } from '@/utils';
@@ -33,9 +37,9 @@ export default {
 			formattedPrice: 0
 		};
 	},
-	created() {
+	async created() {
 		const fileID = this.$route.params.id;
-		const productResponse = __(getFileFromDB(fileID));
+		const productResponse = await __(getFileFromDB(fileID));
 		if (productResponse.error) {
 			this.formError = true;
 			this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_DB;
@@ -47,7 +51,7 @@ export default {
 	methods: {
 		async getPaymentDataFromContract(fileID) {
 			const accounts = await web3.eth.getAccounts();
-			const contractResponse = __(getFileFromContract(fileID));
+			const contractResponse = await __(getFileFromContract(fileID));
 			if (contractResponse.error) {
 				this.formError = true;
 				this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_CONTRACT;
@@ -71,26 +75,18 @@ export default {
 			// use window open to launch save dialog.
 			window.open(`http://localhost:8080/download/${fileID}/${signature}`);
 		},
-		async buy() {
-			const accounts = await web3.eth.getAccounts();
-			contractInstance.methods
-				.purchaseFile(this.$route.params.id)
-				.send({
-					from: accounts[0],
-					value: this.price,
-					gas: '1000000'
-				})
-				.then(receipt => {
-					this.userHasPurchasedFile = true;
-					this.downloadRoute = `http://localhost:8080/download/${
-						this.$route.params.id
-					}`;
-					console.log(receipt);
-				})
-				.catch(error => {
-					console.log('caught error');
-					console.log(error);
-				});
+		async purchaseFile() {
+			// TODO find better way to handle various on events.
+			const fileID = this.$route.params.id;
+			const purchaseResponse = await __(purchaseFile(fileID, this.price));
+			if (purchaseResponse.error) {
+				this.formError = true;
+				this.msg = errorMessages.ERROR_PURCHASING_FILE;
+				return;
+			}
+			this.userHasPurchasedFile = true;
+			this.downloadRoute = `http://localhost:8080/download/${fileID}`;
+			console.log(purchaseResponse.data);
 		}
 	}
 };
