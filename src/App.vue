@@ -8,6 +8,7 @@
 <script>
 import web3 from './web3';
 import instance from './contractInstance';
+import '@/ipfs';
 
 export default {
 	name: 'app'

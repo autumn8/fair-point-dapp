@@ -6,6 +6,9 @@
 npm install
 ```
 
+##Requirements
+Currently this dapp requires the user to have metamask installed. A prompt to this effect will be added later, as well as uport functionality once UPORT play's nicely with web3 v1.
+
 ## Basic Flow
 
 1.  **User A** uploads a high res original file (that is available for purchase), a lower res preview image, and specifies price for item (in ether. A ZAR convenience exchange rate is provided).
