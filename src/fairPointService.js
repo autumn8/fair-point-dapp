@@ -19,6 +19,10 @@ async function getEtherToZarExchangeRate() {
 	);
 }
 
+async function getAllFiles() {
+	return axios.get(`/files`);
+}
+
 //This simply retrieves from orbitDB so we could get it directly in client?
 async function getFileFromDB(fileID) {
 	return axios.get(`/purchase/${fileID}`);
@@ -52,6 +56,7 @@ export {
 	addFileToContract,
 	purchaseFile,
 	sendForm,
+	getAllFiles,
 	getFileFromDB,
 	getFileFromContract,
 	getEtherToZarExchangeRate

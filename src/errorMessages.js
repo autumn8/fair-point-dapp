@@ -7,5 +7,6 @@ export default {
 		'There was an error fetching the file from the IPFS database',
 	ERROR_FETCHING_FILE_FROM_CONTRACT:
 		'There was an error fetching the file from the ethereum contract',
-	ERROR_PURCHASING_FILE: 'There was an error purchasing your file'
+	ERROR_PURCHASING_FILE: 'There was an error purchasing your file',
+	ERROR_ON_RETRIEVING_IMAGES: 'There was an error retrieving the files'
 };
