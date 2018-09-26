@@ -4,10 +4,10 @@
           grid-list-md
         >
           <v-layout row wrap>
-            <div v-for="card in cards" v-bind:key="card._id">
+            <div class="file-item" v-for="card in cards" v-bind:key="card._id">
               <v-card router :to="`/purchase/${card._id}`">
                 <v-img
-                  class='file-image'
+                  class="file-image"
                   :src="'http://ipfs.io/ipfs/' + card.thumbNailHash"
                   height="250px"
                   width = "250px"
@@ -65,7 +65,8 @@ export default {
 </script>
 
 <style>
-.file-image {
-	padding: 10px 0 0 10px;
+.file-item {
+	margin: 0 13px 13px 0px;
+	/* padding: 10px 0 0 10px; */
 }
 </style>
