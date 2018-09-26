@@ -36,30 +36,6 @@ node.on('ready', async () => {
 		const all = db.query(doc => doc._id);
 		console.log(all);
 	});
-
-	db.events.on('replicate.progress', () => {
-		console.log('replicated');
-		const all = db.query(doc => doc._id);
-		console.log(all);
-	});
-
-	// Hook up to the load progress event and render the progress
-	let maxTotal = 0,
-		loaded = 0;
-	db.events.on('load.progress', (address, hash, entry, progress, total) => {
-		loaded++;
-		maxTotal = Math.max.apply(null, [progress, maxTotal, progress, 0]);
-		total = Math.max.apply(null, [progress, maxTotal, total, 0]);
-		console.log(`Loading database... ${maxTotal} / ${total}`);
-	});
-
-	db.events.on('ready', () => {
-		console.log('ready');
-		const all = db.query(doc => doc._id);
-		console.log(all);
-	});
-	//const all = db.query(doc => doc._id);
-	//console.log(all);
 });
 
 export { node, db };
