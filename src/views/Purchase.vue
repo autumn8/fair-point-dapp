@@ -2,15 +2,13 @@
   <div>
     <v-container>
       <v-layout align-center justify-center>
-        <v-flex xs6>
-          <v-card>
-            <v-img
+
+            <img
               :src="src"
-              aspect-ratio="1"
-              class="grey lighten-2">
-            </v-img>
-          </v-card>
-        </v-flex>
+              class="purchase-image"/>
+
+
+
       </v-layout>
       <v-btn v-if="!userHasPurchasedFile" @click="purchaseFile()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
       <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
@@ -91,3 +89,10 @@ export default {
 	}
 };
 </script>
+
+<style>
+.purchase-image {
+	max-width: 1000px;
+	max-height: 1000px;
+}
+</style>
