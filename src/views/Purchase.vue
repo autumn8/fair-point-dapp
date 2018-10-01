@@ -1,17 +1,36 @@
 <template>
   <div>
     <v-container>
-      <v-layout align-center justify-center>
+      <v-layout>
+        <v-flex xs8>
+          <v-card>
+          <v-card-media :src="src" class="purchase-image"></v-card-media>
+        </v-card>
+        </v-flex >
 
-            <img
-              :src="src"
-              class="purchase-image"/>
+        <v-card>
+              <v-layout row>
+                <v-flex xs12>
+                  <v-card-title primary-title class="purchase-column">
+                    <div>
+                      <div class="headline font-weight-bold">{{fileName}}</div>
+                      <div class="text-xs-left subheading font-weight-bold">{{formattedPrice}}</div>
+                    </div>
+                  </v-card-title>
+                  </v-flex>
+              </v-layout>
+              <v-layout>
+
+              <v-btn left v-if="!userHasPurchasedFile" @click="purchaseFile()" large dark color="grey" class="purchase-btn">Buy Now</v-btn>
+              <v-btn left v-if="userHasPurchasedFile" @click="download()"  large dark color="grey" class="purchase-btn">Download Now</v-btn>
+              </v-layout>
+
+            </v-card>
 
 
 
       </v-layout>
-      <v-btn v-if="!userHasPurchasedFile" @click="purchaseFile()" right color="info">Buy Now: {{formattedPrice}}</v-btn>
-      <v-btn v-if="userHasPurchasedFile" @click="download()" right color="info">Download Now</v-btn>
+
 </v-container>
   </div>
 </template>
@@ -44,6 +63,7 @@ export default {
 			return;
 		}
 		this.src = `http://ipfs.io/ipfs/${productResponse.data.data.previewHash}`;
+		this.fileName = productResponse.data.data.fileName;
 		this.getPaymentDataFromContract(fileID);
 	},
 	methods: {
@@ -91,8 +111,11 @@ export default {
 </script>
 
 <style>
-.purchase-image {
-	max-width: 1000px;
-	max-height: 1000px;
+.purchase-column {
+	min-width: 280px;
+}
+
+.v-btn {
+	margin-left: 0;
 }
 </style>
