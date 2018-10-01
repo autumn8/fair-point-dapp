@@ -24,6 +24,11 @@ contract FairPoint {
         bytes32 fileName
     );
 
+    event SendPaymentFailed(
+        address to,
+        uint256 amount
+    );
+
     constructor() public{
       owner = msg.sender;
     }
@@ -41,15 +46,22 @@ contract FairPoint {
         require(file.creator != address(0), 'must be an existing file- ie. have a creator address');
         require(file.buyer == address(0), 'file is already sold');
         require(msg.value >= file.price, 'sufficient funds need to be sent to pay for the file');
-        balances[file.creator].add(msg.value);
+        if (!file.creator.send(msg.value)) {
+          balances[file.creator].add(msg.value);
+          emit SendPaymentFailed(file.creator, msg.value);
+        }
         file.buyer = msg.sender;
         emit FilePurchased(file.creator, file.buyer, fileName);
     }
 
-    function withdrawFunds() public {
-      require(balances[msg.sender] > 0);
-      uint256 amount = balances[msg.sender];
-      balances[msg.sender].sub(amount);
-      msg.sender.transfer(amount);
+    function assistedPayment(address to) public onlyOwner{
+      uint256 amount = balances[to];
+      balances[to].sub(amount);
+      to.transfer(amount);
+    }
+
+    modifier onlyOwner() {
+      require(msg.sender == owner);
+      _;
     }
 }
