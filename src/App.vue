@@ -1,29 +1,21 @@
 <template>
   <v-app>
-    <v-card
-    color="grey lighten-4"
-    flat
-    >
-  <v-toolbar color="grey darken-1" dark>
+
+  <v-toolbar class="app-toolbar"  dark>
+    <v-toolbar-title>FAIR POINT</v-toolbar-title>
     <v-spacer></v-spacer>
     <v-btn
       outline color="white"
-      :loading="loading3"
-      :disabled="loading3"
       class="white--text"
       to="/"
-      @click.native="loader = 'loading3'"
     >
       Upload
       <v-icon right dark>cloud_upload</v-icon>
     </v-btn>
     <v-btn
       outline color="white"
-      :loading="loading3"
-      :disabled="loading3"
       class="white--text"
       to ='/files'
-      @click.native="loader = 'loading3'"
     >
       Files
       <v-icon right dark>file_copy</v-icon>
@@ -32,7 +24,7 @@
 
 
   </v-toolbar>
-</v-card>
+
     <router-view/>
   </v-app>
 </template>
@@ -43,7 +35,10 @@ import instance from './contractInstance';
 import '@/ipfs';
 
 export default {
-	name: 'app'
+	name: 'app',
+	created() {
+		console.log(process.env);
+	}
 };
 </script>
 
@@ -54,5 +49,9 @@ export default {
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
+}
+
+.app-toolbar {
+	opacity: 0.5;
 }
 </style>
