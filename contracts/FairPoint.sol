@@ -14,7 +14,7 @@ contract FairPoint {
         address buyer;
     }
 
-    mapping (address => uint256) balances;
+    mapping (address => uint256) private balances;
 
     mapping (bytes32 => File) public files;
 
@@ -24,17 +24,11 @@ contract FairPoint {
         bytes32 fileName
     );
 
-    event SendPaymentFailed(
-        address to,
-        uint256 amount
-    );
-
     constructor() public{
       owner = msg.sender;
     }
 
     function addFile(bytes32 fileName, uint256 price) public {
-
         File storage file = files[fileName];
         require(file.creator == address(0), 'must be a new file- ie. have no existing creator address');
         require(price != 0, 'must specify a price');
@@ -46,22 +40,17 @@ contract FairPoint {
         require(file.creator != address(0), 'must be an existing file- ie. have a creator address');
         require(file.buyer == address(0), 'file is already sold');
         require(msg.value >= file.price, 'sufficient funds need to be sent to pay for the file');
-        if (!file.creator.send(msg.value)) {
-          balances[file.creator].add(msg.value);
-          emit SendPaymentFailed(file.creator, msg.value);
-        }
+        balances[file.creator] = balances[file.creator].add(msg.value);
         file.buyer = msg.sender;
         emit FilePurchased(file.creator, file.buyer, fileName);
     }
 
-    function assistedPayment(address to) public onlyOwner{
-      uint256 amount = balances[to];
-      balances[to].sub(amount);
-      to.transfer(amount);
+    function withdrawFunds(uint256 amount) public {
+      balances[msg.sender] = balances[msg.sender].sub(amount);
+      msg.sender.transfer(amount);
     }
 
-    modifier onlyOwner() {
-      require(msg.sender == owner);
-      _;
+    function getBalance() view public returns (uint256) {
+      return balances[msg.sender];
     }
 }
