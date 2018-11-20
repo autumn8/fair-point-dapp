@@ -20,3 +20,9 @@ Currently this dapp requires the user to have metamask installed. A prompt to th
 7.  After successful, payment a download button is displayed.
 8.  Clicking download button prompts **user B** to sign a message. This signature is sent to backend where the public key is recovered from the signature.
 9.  The node app queries the ethereum smart contract and if the user who signed the download message is also registered as the buyer on the contract, the encrypted file is retrieved from IPFs, decrypted and streamed to the client for download.
+
+##contract
+To run locally. Install ganache & truffle.
+Start ganache.
+
+1.  Run 'truffle compile' & 'truffle migrate'. Later if changes are made and the contract redeployed, run 'truffle migrate --reset' . Note the deployed contract address and update
