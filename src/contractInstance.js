@@ -1,9 +1,21 @@
-import web3 from './web3';
+import getWeb3 from './web3';
+import { __ } from '@/utils';
 
 import FairPoint from '../build/contracts/FairPoint.json';
-const address = '0x7d4b398469487cc50dc60994eeb96e86fd64a68d';
+const address = '0x1edd797985ab0b0794dda7de6c8f5c8bc9c3473a';
 const { abi } = FairPoint;
 
-const contractInstance = new web3.eth.Contract(abi, address);
+let contractInstance;
 
-export default contractInstance;
+async function createContractInstance() {
+	const { error, data: web3 } = await __(getWeb3);
+	if (error) console.warn(error);
+	return new web3.eth.Contract(abi, address);
+}
+
+async function getContractInstance() {
+	if (!contractInstance) contractInstance = await createContractInstance();
+	return contractInstance;
+}
+
+export default getContractInstance;

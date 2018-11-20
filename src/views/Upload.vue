@@ -1,11 +1,11 @@
 <template>
-    <v-container fluid fill-height>
+    <v-container class='upload' fluid fill-height>
       <v-layout  align-center justify-center>
         <v-flex xs6>
           <v-card class="elevation-12">
             <v-card-text>
                 <v-form ref="form" v-model="valid">
-                  <file-upload v-model="files.primary" message="Select file available for purchase"/>
+                  <file-upload v-model="files.primary" :rules="fileRules" message="Select file available for purchase"/>
                   <file-upload v-model="files.preview" message="Select low-res preview file"/>
                   <v-layout  row wrap>
                     <v-flex xs3>
@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import web3 from '@/web3';
+import getWeb3 from '@/web3';
 import FileUpload from '@/components/FileUpload.vue';
 import {
 	sendForm,
@@ -83,8 +83,12 @@ export default {
 			ethUnit: 'Ether',
 			priceRules: [
 				v => !!v || 'Amount is required',
+				v => !isNaN(v) || 'Amount must be a number',
+				v => v > 0.01 || 'Amount must be greater than 0'
+			],
+			fileRules: [
+				v => !!v || 'File is required',
 				v => !isNaN(v) || 'Amount must be a number'
-				// v => v > 0.01 || 'Amount must be greater than 0'
 			],
 			files: {
 				primary: undefined,
@@ -103,7 +107,7 @@ export default {
 				this.isSending = false;
 				return;
 			}
-
+			const web3 = await getWeb3();
 			const price = web3.utils.toWei(this.price, this.ethUnit);
 			const fileID = formResponse.data.data._id;
 			const contractResponse = await __(addFileToContract(fileID, price));
@@ -119,7 +123,8 @@ export default {
 		},
 		onPriceChange() {
 			console.log(this.price);
-			this.priceSuffix = (this.price * this.exchangeRate).toFixed(2) + ' ZAR';
+			if (this.exchangeRate)
+				this.priceSuffix = (this.price * this.exchangeRate).toFixed(2) + ' ZAR';
 		}
 	}
 };
@@ -128,5 +133,10 @@ export default {
 <style>
 .msg {
 	padding: 10px;
+}
+
+.upload {
+	margin-top: -60px;
+	background: url(../assets/berg.jpg);
 }
 </style>

@@ -1,17 +1,20 @@
 import Web3 from 'web3';
-import { Connect } from 'uport-connect';
 const appName = 'Fair Point';
 let web3;
 
-if (typeof window.web3 === 'undefined') {
-	window.addEventListener('message', ({ data }) => {
-		if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
-			web3 = new Web3(ethereum);
+const getWeb3 = new Promise((resolve, reject) => {
+	window.addEventListener('load', async () => {
+		if (window.ethereum) {
+			web3 = new Web3(window.ethereum);
+			window.ethereum.enable();
+			resolve(web3);
+		} else if (window.web3) {
+			web3 = new Web3(window.web3.currentProvider);
+			resolve(web3);
+		} else {
+			reject('Non-Ethereum browser detected. Install MetaMask!');
 		}
 	});
-	window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
-} else {
-	web3 = new Web3(window.web3.currentProvider);
-}
+});
 
-export default web3;
+export default getWeb3;

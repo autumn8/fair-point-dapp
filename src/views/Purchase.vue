@@ -24,24 +24,20 @@
               <v-btn left v-if="!userHasPurchasedFile" @click="purchaseFile()" large dark color="grey" class="purchase-btn">Buy Now</v-btn>
               <v-btn left v-if="userHasPurchasedFile" @click="download()"  large dark color="grey" class="purchase-btn">Download Now</v-btn>
               </v-layout>
-
             </v-card>
-
-
-
       </v-layout>
-
-</v-container>
+    </v-container>
   </div>
 </template>
 <script>
+import errorMessages from '@/errorMessages';
 import {
 	getFileFromDB,
 	getFileFromContract,
 	purchaseFile
 } from '@/fairPointService';
-import web3 from '@/web3';
-import contractInstance from '@/contractInstance';
+import getWeb3 from '@/web3';
+
 import { __ } from '@/utils';
 
 export default {
@@ -68,6 +64,11 @@ export default {
 	},
 	methods: {
 		async getPaymentDataFromContract(fileID) {
+			const { error, data: web3 } = await __(getWeb3);
+			if (error) {
+				//TODO add more resilient error handling
+				console.warn(error);
+			}
 			const accounts = await web3.eth.getAccounts();
 			const contractResponse = await __(getFileFromContract(fileID));
 			if (contractResponse.error) {
@@ -86,6 +87,7 @@ export default {
 		},
 
 		async download() {
+			const web3 = await __(getWeb3);
 			const accounts = await web3.eth.getAccounts();
 			const fileID = this.$route.params.id;
 			const msg = web3.utils.utf8ToHex(fileID);
