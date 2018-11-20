@@ -11,7 +11,7 @@ const fileHash =
 
 const fileHash2 =
 	'0xc831f48fa2c0a3ffa70380f2bff05f29f37486d896b306dc98a29bfb66c87495';
-const price = web3.utils.toWei('0.2', 'ether');
+const price = web3.utils.toWei('1', 'ether');
 
 let accounts, instance, owner;
 
@@ -78,6 +78,82 @@ contract('FairPoint Test', async accounts => {
 		const file = await instance.methods.files(fileHash).call({ from: owner });
 
 		assert.equal(file.buyer, user);
+	});
+
+	it('creator should be credited with ether once file is purchased', async () => {
+		var BN = web3.utils.BN;
+
+		const ownerBalanceBefore = await instance.methods
+			.getBalance()
+			.call({ from: owner });
+
+		console.log('ownerBalance before purchase', ownerBalanceBefore);
+		console.log('price', price);
+
+		await instance.methods.addFile(fileHash, price).send({
+			from: owner,
+			gas: '1000000'
+		});
+
+		await instance.methods.purchaseFile(fileHash).send({
+			from: user,
+			value: price,
+			gas: '1000000'
+		});
+
+		const ownerBalanceAfter = await instance.methods
+			.getBalance()
+			.call({ from: owner });
+
+		console.log('ownerBalance after purchase', ownerBalanceAfter);
+		const actual = new BN(ownerBalanceAfter).toString();
+		const expected = new BN(ownerBalanceBefore).add(new BN(price)).toString();
+		assert.equal(actual, expected);
+	});
+
+	it('creator should be able to withdrawFunds', async () => {
+		var BN = web3.utils.BN;
+
+		const ownerBalanceBefore = await web3.eth.getBalance(owner);
+
+		await instance.methods.addFile(fileHash, price).send({
+			from: owner,
+			gas: '1000000'
+		});
+
+		console.log('ownerBalance before withdrawal', ownerBalanceBefore);
+		console.log('price', price);
+
+		await instance.methods.purchaseFile(fileHash).send({
+			from: user,
+			value: price,
+			gas: '1000000'
+		});
+
+		const receipt = await instance.methods.withdrawFunds(price).send({
+			from: owner,
+			gas: '1000000'
+		});
+
+		const { gasUsed } = receipt;
+		const tx = await web3.eth.getTransaction(receipt.transactionHash);
+		const { gasPrice } = tx;
+		const ownerBalanceAfter = await web3.eth.getBalance(owner);
+
+		console.log('ownerBalance after withdrawal', ownerBalanceAfter);
+		const actual = new BN(ownerBalanceAfter);
+		const gasCost = new BN(gasPrice).mul(new BN(gasUsed));
+		const expected = new BN(ownerBalanceBefore).add(new BN(price)).sub(gasCost);
+
+		console.log(expected.sub(actual).toString());
+
+		assert.equal(
+			actual.toString(),
+			expected.toString(),
+			'Balance after should equal balance before plus withdrawal amount, minus gas costs'
+		);
+
+		assert.equal(actual, expected);
 	});
 });
 
