@@ -2,12 +2,18 @@
   <v-app>
 
   <v-toolbar class="app-toolbar"  dark>
-    <v-toolbar-title>FAIR POINT</v-toolbar-title>
+    <v-toolbar-title to ='/upload'><v-btn
+      flat
+      class="white--text"
+      to ='/upload'
+    >
+    FAIR POINT
+  </v-btn></v-toolbar-title>
     <v-spacer></v-spacer>
     <v-btn
       outline color="white"
       class="white--text"
-      to="/"
+      to="/upload"
     >
       Upload
       <v-icon right dark>cloud_upload</v-icon>
@@ -31,7 +37,8 @@
 
 <script>
 export default {
-	name: 'app'
+	name: 'app',
+	created() {}
 };
 </script>
 
