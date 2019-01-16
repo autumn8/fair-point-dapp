@@ -1,11 +1,12 @@
-import web3 from '@/web3';
+import { web3 } from '@/web3';
 import axios from '@/axios';
-import getContractInstance from '@/contractInstance';
+import { contractInstance } from './contractInstance';
 
-function sendForm(files) {
+function sendForm(files, fileName) {
 	const formData = new FormData();
 	formData.append('primary', files.primary, files.primary.name);
 	formData.append('preview', files.preview, files.primary.name);
+	formData.append('title', fileName);
 	return axios.post('/upload', formData, {
 		headers: {
 			'Content-Type': 'multipart/form-data'
@@ -23,21 +24,21 @@ async function getAllFiles() {
 	return axios.get(`/files`);
 }
 
-//This simply retrieves from orbitDB so we could get it directly in client?
+//This simply from orbitDB. We do it via API call because it's faster.
 async function getFileFromDB(fileID) {
 	return axios.get(`/purchase/${fileID}`);
 }
 
 async function getFileFromContract(fileID) {
-	const accounts = await web3.eth.getAccounts();
-	const contractInstance = await getContractInstance();
+	const accounts = web3.eth.getAccounts();
+	const contractInstance = contractInstance();
 	return contractInstance.methods.files(fileID).call({ from: accounts[0] });
 }
 
 async function addFileToContract(fileID, price) {
-	const accounts = await web3.eth.getAccounts();
+	const accounts = web3.eth.getAccounts();
 	const gas = '1000000';
-	const contractInstance = await getContractInstance();
+	const contractInstance = contractInstance();
 	return contractInstance.methods.addFile(fileID, price).send({
 		from: accounts[0],
 		gas
@@ -45,9 +46,9 @@ async function addFileToContract(fileID, price) {
 }
 
 async function purchaseFile(fileID, value) {
-	const accounts = await web3.eth.getAccounts();
+	const accounts = web3.eth.getAccounts();
 	const gas = '1000000';
-	const contractInstance = await getContractInstance();
+	const contractInstance = contractInstance();
 	return contractInstance.methods.purchaseFile(fileID).send({
 		from: accounts[0],
 		value,
@@ -55,7 +56,7 @@ async function purchaseFile(fileID, value) {
 	});
 }
 
-export {
+export default {
 	addFileToContract,
 	purchaseFile,
 	sendForm,

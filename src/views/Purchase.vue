@@ -13,14 +13,13 @@
                 <v-flex xs12>
                   <v-card-title primary-title class="purchase-column">
                     <div>
-                      <div class="headline font-weight-bold">{{fileName}}</div>
+                      <div class="headline font-weight-bold">{{title}}</div>
                       <div class="text-xs-left subheading font-weight-bold">{{formattedPrice}}</div>
                     </div>
                   </v-card-title>
                   </v-flex>
               </v-layout>
               <v-layout>
-
               <v-btn left v-if="!userHasPurchasedFile" @click="purchaseFile()" large dark color="grey" class="purchase-btn">Buy Now</v-btn>
               <v-btn left v-if="userHasPurchasedFile" @click="download()"  large dark color="grey" class="purchase-btn">Download Now</v-btn>
               </v-layout>
@@ -31,18 +30,16 @@
 </template>
 <script>
 import errorMessages from '@/errorMessages';
-import {
-	getFileFromDB,
-	getFileFromContract,
-	purchaseFile
-} from '@/fairPointService';
-import getWeb3 from '@/web3';
+import fairPointService from '@/fairPointService';
+import {web3} from '@/web3';
 
 import { __ } from '@/utils';
+
 
 export default {
 	data() {
 		return {
+			title: '',
 			src: '',
 			price: 0,
 			userHasPurchasedFile: false,
@@ -52,25 +49,20 @@ export default {
 	},
 	async created() {
 		const fileID = this.$route.params.id;
-		const productResponse = await __(getFileFromDB(fileID));
+		const productResponse = await __(fairPointService.getFileFromDB(fileID));
 		if (productResponse.error) {
 			this.formError = true;
 			this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_DB;
 			return;
 		}
 		this.src = `http://ipfs.io/ipfs/${productResponse.data.data.previewHash}`;
-		this.fileName = productResponse.data.data.fileName;
+		this.title = productResponse.data.data.title;
 		this.getPaymentDataFromContract(fileID);
 	},
 	methods: {
-		async getPaymentDataFromContract(fileID) {
-			const { error, data: web3 } = await __(getWeb3);
-			if (error) {
-				//TODO add more resilient error handling
-				console.warn(error);
-			}
-			const accounts = await web3.eth.getAccounts();
-			const contractResponse = await __(getFileFromContract(fileID));
+		async getPaymentDataFromContract(fileID) {			
+			const accounts = web3.eth.getAccounts();
+			const contractResponse = await __(fairPointService.getFileFromContract(fileID));
 			if (contractResponse.error) {
 				this.formError = true;
 				this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_CONTRACT;
@@ -86,9 +78,8 @@ export default {
 			this.formattedPrice = `${web3.utils.fromWei(this.price, 'ether')} Eth`;
 		},
 
-		async download() {
-			const web3 = await __(getWeb3);
-			const accounts = await web3.eth.getAccounts();
+		async download() {			
+			const accounts = web3.eth.getAccounts();
 			const fileID = this.$route.params.id;
 			const msg = web3.utils.utf8ToHex(fileID);
 			const signature = await web3.eth.personal.sign(msg, accounts[0]);
@@ -98,7 +89,7 @@ export default {
 		async purchaseFile() {
 			// TODO find better way to handle various on events.
 			const fileID = this.$route.params.id;
-			const purchaseResponse = await __(purchaseFile(fileID, this.price));
+			const purchaseResponse = await __(fairPointService.purchaseFile(fileID, this.price));
 			if (purchaseResponse.error) {
 				this.formError = true;
 				this.msg = errorMessages.ERROR_PURCHASING_FILE;
