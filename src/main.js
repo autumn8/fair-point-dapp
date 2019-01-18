@@ -7,15 +7,22 @@ import router from '@/router';
 import { createWeb3Instance } from './web3';
 import { createContractInstance } from './contractInstance';
 import { __ } from '@/utils';
-let hasInitialized = false;
 
 Vue.config.productionTip = false;
 
 function init() {
 	console.log('init');
-	const web3 = createWeb3Instance()
-		.then(data => createContractInstance(data))
-		.then(_ => {
+	//TODO handle web3 and contract instance errors
+	createWeb3Instance()
+		.then(async web3 => {
+			store.commit('web3', web3);	
+								
+			return createContractInstance(web3);
+		})
+		.then(contractInstance => {
+			console.log(contractInstance);
+			store.commit('contractInstance', contractInstance);
+
 			console.log('initialized');
 			store.commit('initialize');
 			router.push('upload');

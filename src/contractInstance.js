@@ -1,7 +1,7 @@
 import { __ } from '@/utils';
 
 import FairPoint from '../build/contracts/FairPoint.json';
-const address = '0xbfF5AD8940a58803e722107Cb30B2FF8CFC62874';
+const address = '0x5796BfA15b18B90eaB6DF5fA9c9E1471B968718f';
 const { abi } = FairPoint;
 
 let contractInstance;
