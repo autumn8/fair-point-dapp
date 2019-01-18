@@ -1,6 +1,7 @@
-import { web3 } from '@/web3';
+import store from '@/store';
 import axios from '@/axios';
-import { contractInstance } from './contractInstance';
+
+
 
 function sendForm(files, fileName) {
 	const formData = new FormData();
@@ -30,15 +31,15 @@ async function getFileFromDB(fileID) {
 }
 
 async function getFileFromContract(fileID) {
-	const accounts = web3.eth.getAccounts();
-	const contractInstance = contractInstance();
+	const {web3, contractInstance} = store.state;
+	const accounts = await web3.eth.getAccounts();	
 	return contractInstance.methods.files(fileID).call({ from: accounts[0] });
 }
 
 async function addFileToContract(fileID, price) {
-	const accounts = web3.eth.getAccounts();
-	const gas = '1000000';
-	const contractInstance = contractInstance();
+	const {web3, contractInstance} = store.state;
+	const accounts = await web3.eth.getAccounts();
+	const gas = '1000000';	
 	return contractInstance.methods.addFile(fileID, price).send({
 		from: accounts[0],
 		gas
@@ -46,9 +47,9 @@ async function addFileToContract(fileID, price) {
 }
 
 async function purchaseFile(fileID, value) {
-	const accounts = web3.eth.getAccounts();
-	const gas = '1000000';
-	const contractInstance = contractInstance();
+	const {web3, contractInstance} = store.state;
+	const accounts = await web3.eth.getAccounts();
+	const gas = '1000000';	
 	return contractInstance.methods.purchaseFile(fileID).send({
 		from: accounts[0],
 		value,

@@ -25,4 +25,8 @@ Currently this dapp requires the user to have metamask installed. A prompt to th
 To run locally. Install ganache & truffle.
 Start ganache.
 
-1.  Run 'truffle compile' & 'truffle migrate'. Later if changes are made and the contract redeployed, run 'truffle migrate --reset' . Note the deployed contract address and update
+Run **npm run serve**, but make sure it's running on port 8080. ie. start it before starting the fair point node service, or hot reloads won't work.
+
+1.  Run 'truffle compile' & 'truffle migrate'. Later if changes are made and the contract redeployed, run 'truffle migrate --reset' . Note the deployed contract address and update the contractInstance address. This address also needs to be updated in the fair point server app. TODO - create build script too handle this
+
+2. Web3 instance & contractInstance's are spun up on client launch and before vue
