@@ -25,7 +25,15 @@ function init() {
 
 			console.log('initialized');
 			store.commit('initialize');
-			router.push('upload');
+			router.push('upload');			
+			store.state.contractInstance.events.FilePurchased({				
+				fromBlock: 0
+			})
+			.on('data', function(event){				
+				console.log(event); // same results as the optional callback above
+			})
+			.on('error', console.error);
+
 		})
 		.catch(error => {
 			router.push('error');
