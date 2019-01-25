@@ -7,39 +7,40 @@
             <v-card-media :src="src" class="purchase-image"></v-card-media>
           </v-card>
         </v-flex>
-
-        <v-card>
-          <v-layout row>
-            <v-flex xs12>
-              <v-card-title primary-title class="purchase-column">
-                <div>
-                  <div class="headline font-weight-bold">{{title}}</div>
-                  <div class="text-xs-left subheading font-weight-bold">{{formattedPrice}}</div>
-                </div>
-              </v-card-title>
-            </v-flex>
-          </v-layout>
-          <v-layout>
-            <v-btn
-              left
-              v-if="!userHasPurchasedFile"
-              @click="purchaseFile()"
-              large
-              dark
-              color="grey"
-              class="purchase-btn"
-            >Buy Now</v-btn>
-            <v-btn
-              left
-              v-if="userHasPurchasedFile"
-              @click="download()"
-              large
-              dark
-              color="grey"
-              class="purchase-btn"
-            >Download Now</v-btn>
-          </v-layout>
-        </v-card>
+        <v-flex xs4>
+          <v-card>
+             <v-flex xs12>
+              <v-layout row>              
+                  <v-card-title primary-title class="purchase-column">
+                    <div>
+                      <div class="headline font-weight-bold">{{title}}</div>
+                      <div class="text-xs-left subheading font-weight-bold">{{formattedPrice}}</div>
+                    </div>
+                  </v-card-title>                
+              </v-layout>
+             </v-flex>
+            <v-layout>
+              <v-btn
+                left
+                v-if="!userHasPurchasedFile"
+                @click="purchaseFile()"
+                large
+                dark
+                color="grey"
+                class="purchase-btn"
+              >Buy</v-btn>
+              <v-btn
+                left
+                v-if="userHasPurchasedFile"
+                @click="download()"
+                large
+                dark
+                color="grey"
+                class="purchase-btn"
+              >Download Now</v-btn>
+            </v-layout>
+          </v-card>
+        </v-flex>
       </v-layout>
     </v-container>
   </div>
@@ -64,13 +65,13 @@ export default {
   },
   async created() {
     const fileID = this.$route.params.id;
-    const productResponse = await __(fairPointService.getFileFromDB(fileID));
+    const productResponse = await __(fairPointService.getFileDataFromDB(fileID));
     if (productResponse.error) {
       this.formError = true;
       this.msg = errorMessages.ERROR_FETCHING_FILE_FROM_DB;
       return;
     }
-    this.src = `http://ipfs.io/ipfs/${productResponse.data.data.previewHash}`;
+    this.src = `${process.env.VUE_APP_IPFS_GATEWAY}/${productResponse.data.data.previewHash}`;
     this.title = productResponse.data.data.title;
     this.getPaymentDataFromContract(fileID);
   },
@@ -90,8 +91,7 @@ export default {
       const { buyer, price } = contractResponse.data;
 
       if (accounts[0] === buyer) {
-        this.userHasPurchasedFile = true;
-        this.downloadRoute = `http://localhost:8080/download/${fileID}`;
+        this.userHasPurchasedFile = true;       
       }
       this.price = price;
       this.formattedPrice = `${web3.utils.fromWei(this.price, "ether")} Eth`;
@@ -104,7 +104,7 @@ export default {
       const msg = web3.utils.utf8ToHex(fileID);
       const signature = await web3.eth.personal.sign(msg, accounts[0]);
       // use window open to launch save dialog.
-      window.open(`http://localhost:8080/download/${fileID}/${signature}`);
+      window.open(`${process.env.VUE_APP_ROOT_URL}/download/${fileID}/${signature}`);
     },
     async purchaseFile() {
       // TODO find better way to handle various on events.
@@ -117,8 +117,7 @@ export default {
         this.msg = errorMessages.ERROR_PURCHASING_FILE;
         return;
       }
-      this.userHasPurchasedFile = true;
-      this.downloadRoute = `http://localhost:8080/download/${fileID}`;
+      this.userHasPurchasedFile = true;      
       console.log(purchaseResponse.data);
     }
   }

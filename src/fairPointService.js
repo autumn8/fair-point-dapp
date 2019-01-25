@@ -26,7 +26,7 @@ async function getAllFiles() {
 }
 
 //This simply from orbitDB. We do it via API call because it's faster.
-async function getFileFromDB(fileID) {
+async function getFileDataFromDB(fileID) {
 	return axios.get(`/purchase/${fileID}`);
 }
 
@@ -62,7 +62,7 @@ export default {
 	purchaseFile,
 	sendForm,
 	getAllFiles,
-	getFileFromDB,
+	getFileDataFromDB,
 	getFileFromContract,
 	getEtherToZarExchangeRate
 };
